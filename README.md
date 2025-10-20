@@ -12,7 +12,11 @@ An unofficial [Floatplane](https://www.floatplane.com/) client for tvOS written 
 
 ## Screenshots
 
-See https://imgur.com/a/vXAcEJy for screenshots of Wasserflug.
+<div display="flex">
+  <img src="./Resources/Screenshots/home.jpg" width="32%">
+  <img src="./Resources/Screenshots/ltt.jpg" width="32%">
+  <img src="./Resources/Screenshots/video.jpg" width="32%">
+</div>
 
 ## Features
 
