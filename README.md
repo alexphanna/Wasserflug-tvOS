@@ -1,6 +1,6 @@
 <h1 align="center">Wasserflug</h1>
 
-[![Download on the App Store](Download_on_Apple_TV.svg)](https://apps.apple.com/us/app/ru-eating/id6692608792?platform=iphone)
+[![Download on the App Store](./Resources/Download_on_Apple_TV.svg)](https://apps.apple.com/us/app/wasserflug/id1611976921)
 
 An unofficial [Floatplane](https://www.floatplane.com/) client for tvOS written in **Swift** using **SwiftUI**.
 
@@ -47,13 +47,13 @@ An unofficial [Floatplane](https://www.floatplane.com/) client for tvOS written 
 
 ## Frequently Asked Questions
 
-**Q: How do I login using my  LinusTechTips Forums account?**
+**Q: How do I log in using my LinusTechTips Forums or Discord account?**
 
-A: When you log in to Floatplane using a Discord or LTT Forum account, an account is made for you in Floatplane as well, with its own password and username (the username is usually copied from the other service). You were asked to create a Floatplane-specific password when you first logged in. This is the information you should use to log in to Wasserflug. If you have forgotten the Floatplane password for this account (because you normally use LTT Forum or Discord to log in), you can go onto the Floatplane website to change your password first.
+A: If you normally log in to Floatplane using a Discord or LTT Forums account, a Floatplane account has automatically created for you. The username for this account should have been copied from the other service. The password should have been set when you first logged in. If you forgot your password, you can use the [forgot password](https://www.floatplane.com/forgot-password) page to reset it.
 
-**Q: I'm getting an error when logging in, "Logging in was successful, but an error was encountered while loading your user profile."? What do I do?**
+**Q: I'm getting an error when logging in, "Logging in was successful, but an error was encountered while loading your user profile." What do I do?**
 
-A: This happens sometimes because of the differences between the LTT subscriptions and other content creators on Floatplane having slightly different data here and there. Let the app developer know over Discord or email and the issue can be sorted out quickly enough!
+A: This happens because of minor backend discrepancies between LTT and other content creators on Floatplane. Please contact the developer over Discord or email to resolve this issue.
 
 ## Contributing
 
