@@ -4,7 +4,7 @@ import Vapor
 
 class BaseViewModel {
 	lazy var logger: Logger = {
-		var logger = Wasserflug.logger
+		var logger = Wasserflug_tvOSApp.logger
 		logger[metadataKey: "class"] = "\(Self.Type.self)"
 		return logger
 	}()

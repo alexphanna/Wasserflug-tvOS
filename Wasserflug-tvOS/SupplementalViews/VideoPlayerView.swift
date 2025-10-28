@@ -13,7 +13,7 @@ struct VideoPlayerView: UIViewControllerRepresentable {
 	let beginningWatchTime: Double
 	
 	let logger: Logger = {
-		var logger = Wasserflug.logger
+		var logger = Wasserflug_tvOSApp.logger
 		logger[metadataKey: "class"] = "\(Self.Type.self)"
 		return logger
 	}()
@@ -90,9 +90,9 @@ struct VideoPlayerView: UIViewControllerRepresentable {
 	}
 	
 	static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: Self.Coordinator) {
-        Wasserflug.logger.notice("Dismantling AVPlayerViewController.")
+		Wasserflug_tvOSApp.logger.notice("Dismantling AVPlayerViewController.")
 		if let player = uiViewController.player {
-            Wasserflug.logger.notice("Pausing AVPlayerViewController's AVPlayer before dismantling.")
+			Wasserflug_tvOSApp.logger.notice("Pausing AVPlayerViewController's AVPlayer before dismantling.")
 			player.pause()
 			uiViewController.delegate?.playerViewControllerDidEndDismissalTransition?(uiViewController)
 		}

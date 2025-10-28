@@ -32,31 +32,7 @@ class CreatorContentViewModel: BaseViewModel, ObservableObject {
 			return nil
 		}
 	}
-    
-    var coverImageWidth: CGFloat? {
-        if let cover = creator.cover {
-            return CGFloat(cover.width)
-        } else {
-            return nil
-        }
-    }
-    
-    var coverImageHeight: CGFloat? {
-        if let cover = creator.cover {
-            return CGFloat(cover.height)
-        } else {
-            return nil
-        }
-    }
-    
-    var coverRatio: CGFloat? {
-        if let cover = creator.cover {
-            return CGFloat(cover.aspectRatio)
-        } else {
-            return nil
-        }
-    }
-    
+	
 	var creatorProfileImagePath: URL? {
 		URL(string: creatorOrChannel.icon.path)
 	}

@@ -38,70 +38,81 @@ struct BlogPostSelectionView: View {
 							.foregroundColor(.white)
 					}
 				}
-				
-				HStack(alignment: .top, spacing: 0) {
-					let profileImageSize: CGFloat = 35
-					if case let .home(creatorOwner) = viewOrigin,
-					   let profileImagePath = creatorOwner?.profileImage.path,
-					   let profileImageUrl = URL(string: profileImagePath) {
-						CachedAsyncImage(url: profileImageUrl, content: { image in
-							image
-								.resizable()
-								.scaledToFit()
-								.frame(width: profileImageSize, height: profileImageSize)
-								.cornerRadius(profileImageSize / 2)
-						}, placeholder: {
-							ProgressView()
-								.frame(width: profileImageSize, height: profileImageSize)
-						})
-							.padding([.all], 5)
-					}
-					VStack(alignment: .leading, spacing: 4) {
-						Text(verbatim: blogPost.title)
-							.font(.caption2)
-							.lineLimit(2)
-						HStack(spacing: 10) {
-							let meta = blogPost.metadata
-							Text("\(meta.hasVideo ? "Video" : meta.hasAudio ? "Audio" : meta.hasGallery ? "Gallery" : "Picture")")
-		//						.font(.caption2)
-								.padding([.all], 5)
-								.foregroundColor(.white)
-								.background(.gray)
-								.cornerRadius(10)
-							
-							let duration: TimeInterval = meta.hasVideo ? meta.videoDuration : meta.hasAudio ? meta.audioDuration : 0.0
-							if duration != 0 {
-								Image(systemName: "clock")
-								Text("\(TimeInterval(duration).floatplaneTimestamp)")
-							}
-							Spacer()
-							Text("\(relativeTimeConverter.localizedString(for: blogPost.releaseDate, relativeTo: Date()))")
-								.lineLimit(1)
-						}
-							.font(.system(size: 18, weight: .light))
-						if case .home(_) = viewOrigin {
-							Text(verbatim: blogPost.creator.title)
-								.font(.system(size: 18, weight: .light))
-						}
-					}
-				}
-			}
-				.padding()
-		})
-			.buttonStyle(.plain)
-            #if os(tvOS)
+			})
+			.buttonStyle(.card)
+			.padding(.bottom)
 			.onPlayPauseCommand(perform: {
 				if blogPost.isAccessible {
 					navCoordinator.push(route: .blogPostView(blogPostId: blogPost.id, autoPlay: true))
 				}
 			})
-            #endif
-			.sheet(isPresented: $isSelected, onDismiss: {
-				shouldAutoPlay = false
-				isSelected = false
-			}, content: {
-				BlogPostView(viewModel: BlogPostViewModel(fpApiService: fpApiService, id: blogPost.id), shouldAutoPlay: shouldAutoPlay)
-			})
+			
+			// Below the image: title, length, tags, etc.
+			HStack(alignment: .top, spacing: 0) {
+				let profileImageSize: CGFloat = 35
+				// Show the channel icon, regardless of view origin.
+				if case let .typeChannelModel(channel) = blogPost.channel,
+				   let channelIconUrl = URL(string: channel.icon.path) {
+					AsyncImage(url: channelIconUrl, content: { image in
+						image
+							.resizable()
+							.scaledToFit()
+							.frame(width: profileImageSize, height: profileImageSize)
+							.cornerRadius(profileImageSize / 2)
+					}, placeholder: {
+						ProgressView()
+							.frame(width: profileImageSize, height: profileImageSize)
+					})
+					.padding([.trailing], 10)
+				}
+				
+				VStack(alignment: .leading, spacing: 4) {
+					// Blog post title
+					Text(verbatim: blogPost.title)
+						.font(.caption2)
+						.lineLimit(2)
+					
+					// Video/Audio/Gallery/Picture tags
+					HStack(spacing: 10) {
+						let meta = blogPost.metadata
+						if meta.hasVideo {
+							AttachmentPill(text: "Video")
+						}
+						if meta.hasAudio {
+							AttachmentPill(text: "Audio")
+						}
+						if meta.hasPicture {
+							AttachmentPill(text: "Picture")
+						}
+						if !meta.hasVideo && !meta.hasAudio && !meta.hasPicture {
+							AttachmentPill(text: "Text")
+						}
+						
+						// Video/audio duration with clock icon
+						let duration: TimeInterval = meta.videoCount == 1 ? meta.videoDuration : meta.audioCount == 1 ? meta.audioDuration : 0.0
+						if duration != 0 {
+							Image(systemName: "clock")
+							Text("\(TimeInterval(duration).floatplaneTimestamp)")
+								.lineLimit(1)
+								.accessibilityLabel("Duration \(TimeInterval(duration).accessibleFloatplanetimestamp)")
+						}
+					}
+					.font(.system(size: 18, weight: .light))
+					
+					HStack {
+						// Creator name on bottom of card
+						Text(verbatim: blogPost.channel.asChannelModel?.title ?? blogPost.creator.title)
+						
+						Spacer(minLength: 0)
+						
+						Text("\(relativeTimeConverter.localizedString(for: blogPost.releaseDate, relativeTo: Date()))")
+							.lineLimit(1)
+					}
+					.font(.system(size: 18, weight: .light))
+				}
+			}
+		}
+		.focusSection()
 	}
 }
 

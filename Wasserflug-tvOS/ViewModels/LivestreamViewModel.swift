@@ -27,31 +27,11 @@ class LivestreamViewModel: BaseViewModel, ObservableObject {
 	
 	@Published var state: ViewModelState<(CreatorModelV2, CdnDeliveryV3Response, URL)> = .idle
 	@Published var isLive: Bool = false
-	@Published var state: ViewModelState<CdnDeliveryV2Response> = .idle
-	@Published var fetchedIsLive: Bool = false
 	@Published var isLoadingLiveStatus: Bool = false
-    
-    var isLive: Bool {
-        if mockIsLive {
-            return true
-        } else {
-            return fetchedIsLive
-        }
-    }
 	
 	private let fpApiService: FPAPIService
 	let creatorId: String
 	
-    private var mockIsLive: Bool = false
-    
-	var avMetadataItems: [AVMetadataItem] {
-		return [
-			metadataItem(identifier: .commonIdentifierTitle, value: creator.liveStream?.title ?? "Livestream"),
-			metadataItem(identifier: .commonIdentifierDescription, value: creator.liveStream?.description ?? ""),
-		]
-	}
-	
-	@Published var path: String? = nil
 	var shouldUpdatePlayer = false
 	var liveStatusTimer: Timer?
 	
@@ -60,13 +40,6 @@ class LivestreamViewModel: BaseViewModel, ObservableObject {
 		self.creatorId = creatorId
 	}
 	
-    /// For preview mocking
-    init(fpApiService: FPAPIService, creator: CreatorModelV2, mockIsLive: Bool) {
-        self.fpApiService = fpApiService
-        self.creator = creator
-        self.mockIsLive = mockIsLive
-    }
-    
 	func load() {
 		Task { @MainActor in
 			state = .loading
@@ -140,19 +113,19 @@ class LivestreamViewModel: BaseViewModel, ObservableObject {
 					switch result {
 					case let .success(clientResponse):
 						if clientResponse.status == .ok {
-							self.fetchedIsLive = true
+							self.isLive = true
 							self.logger.debug("Livestream is live", metadata: [
 								"id": "\(self.creatorId)",
 							])
 						} else {
-							self.fetchedIsLive = false
+							self.isLive = false
 							self.logger.debug("Livestream is not live", metadata: [
 								"id": "\(self.creatorId)",
 							])
 						}
 					case let .failure(error):
 						self.logger.warning("Encountered unexpected error when loading livestream status. Error: \(String(reflecting: error))")
-						self.fetchedIsLive = false
+						self.isLive = false
 					}
 				}
 			})
