@@ -17,23 +17,47 @@ struct LoginView: View {
 	@FocusState private var focusedField: Field?
 	
 	var body: some View {
-		GeometryReader { geometry in
-			ZStack {
-				VStack {
-					Text("Login to Floatplane")
-						.bold()
-					Spacer()
-					
-					TextField("Username", text: $username)
-						.textContentType(.username)
-						.font(.system(size: 36))
-						.focused($focusedField, equals: .usernameField)
-						.onSubmit {
-							DispatchQueue.main.asyncAfter(deadline: .now() + 0.50, execute: {
-								if username != "" {
-									if password == "" {
-										focusedField = .passwordField
-									} else {
+		ZStack {
+			NavigationLink(isActive: $viewModel.needsSecondFactor, destination: {
+				SecondFactorView(isLoggingIn: $isLoggingIn, viewModel: viewModel)
+			}, label: {
+				EmptyView()
+			}).hidden()
+			
+			GeometryReader { geometry in
+				ZStack {
+					VStack {
+						Text("Login to Floatplane")
+							.bold()
+                        Spacer()
+						TextField("Username", text: $username)
+							.textContentType(.username)
+							.focused($focusedField, equals: .usernameField)
+							.onSubmit {
+								print("username on submit")
+								DispatchQueue.main.asyncAfter(deadline: .now() + 0.50, execute: {
+									print("username on submit delayed")
+									if username != "" {
+										if password == "" {
+											print("un: setting to password field")
+											focusedField = .passwordField
+										} else {
+											print("un: setting to login button")
+											focusedField = .loginButton
+										}
+									}
+								})
+							}
+
+						SecureField("Password", text: $password)
+							.textContentType(.password)
+							.focused($focusedField, equals: .passwordField)
+							.onSubmit {
+								print("password on submit")
+								DispatchQueue.main.asyncAfter(deadline: .now() + 0.50, execute: {
+									print("password on submit delayed")
+									if password != "" {
+										print("pw: setting to login button")
 										focusedField = .loginButton
 									}
 								}

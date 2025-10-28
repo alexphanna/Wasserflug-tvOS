@@ -81,31 +81,61 @@ class VideoViewModel: BaseViewModel, ObservableObject {
 				self.state = .failed(error)
 				return
 			}
-			
-			self.logger.notice("Received video information.", metadata: [
-				"origins": "\(deliveryInfo.groups.flatMap({ $0.origins ?? [] }).map(\.url).joined(separator: ", "))",
-			])
-			
-			let screenNativeBounds = UIScreen.main.nativeBounds
-			// Only use the first group, for now.
-			let group = deliveryInfo.groups.first
-			let variants = group?.variants
-			let filteredVariants = variants?.filter({ variant in
-				let enabled = variant.enabled ?? false
-				let hidden = variant.hidden ?? false
-				
-				// Filter out resolutions larger than the device's screen resolution to save
-				// on bandwidth and downscaling performance.
-				// Use height for these comparisons. If using width, we run into funny issues with
-				// LTT videos which use 2:1 aspect ratios (1080p is 2160x1080 instead of 1920x1080,
-				// and 4K is 4320x2160 instead of 3480x2160) which makes screen size comparisons
-				// difficult to do correctly.
-				// Just in case some creators have funny heights, allow for a 15% tolerance.
-				var videoSizeOkay: Bool = false
-				if let video = variant.meta?.video {
-					videoSizeOkay = CGFloat(video.height ?? 0) <= (screenNativeBounds.height * 1.15)
-					if !videoSizeOkay {
-						self.logger.warning("Ignoring quality level \(String(describing: variant.name)) (\(video.width ?? 0) x \(video.height ?? 0)) due to larger-than-screen height of \(screenNativeBounds.height).")
+			.whenComplete { result in
+				DispatchQueue.main.async {
+					switch result {
+					case let .success(response):
+						self.logger.notice("Received video information.", metadata: [
+							"cdn": "\(response.cdn)",
+						])
+						let baseCdn = response.cdn
+						let pathTemplate = response.resource.uri!
+                        var screenWidth = UIScreen.main.bounds.width
+                        if screenWidth < UIScreen.main.bounds.height {
+                            screenWidth = UIScreen.main.bounds.height
+                        }
+						let levels = response.resource.data.qualityLevels?
+							.filter({ qualityLevel in
+								// Filter out resolutions larger than the device's screen resolution.
+								// LTT's videos at the stated 1080p are actually 2160x1080 instead of 1920x1080, like most
+								// television screens are. With a strict comparison, LTT 1080p videos would be filtered
+								// out on 1080p televisions. Thus, add 15% to the screen size to account for this. This
+								// will allow for actually getting 1080p on 1080p screens, with only a little bit of downsampling.
+								// But, it wouldn't make sense to show 4k on a 1080p screen. Waste of bandwidth, and the
+								// hardware may not like the massive downsampling.
+								let result = CGFloat(qualityLevel.width) <= (screenWidth * 1.15)
+								if !result {
+									self.logger.warning("Ignoring quality level \(String(describing: qualityLevel)) due to larger-than-screen width of \(screenWidth)")
+								}
+								return result
+							})
+							.compactMap({ (qualityLevel) -> (String, URL)? in
+								// Map the quality levels to the correct URL
+								guard let param = response.resource.data.qualityLevelParams?[qualityLevel.name] else {
+									self.logger.warning("Ignoring quality level \(qualityLevel.name) because no parameter information was found.")
+									return nil
+								}
+								let path = pathTemplate
+									.replacingOccurrences(of: "{qualityLevels}", with: qualityLevel.name)
+									.replacingOccurrences(of: "{qualityLevelParams.token}", with: param.token)
+								return (qualityLevel.name, URL(string: baseCdn + path)!)
+							})
+							?? [(String, URL)]()
+						self.qualityLevels = Dictionary(uniqueKeysWithValues: levels)
+						
+						if self.qualityLevels.isEmpty {
+							self.logger.warning("No quality levels were able to be parsed from the video response. Showing an error to the user.", metadata: [
+								"id": "\(self.videoAttachment.guid)",
+								"qualityLevelNames": "\(response.resource.data.qualityLevels?.map({ $0.name }).joined(separator: ", ") ?? "no quality levels found")",
+								"qualityLevelParams": "\(response.resource.data.qualityLevelParams?.keys.joined(separator: ", ") ?? "no params found")",
+							])
+							self.state = .failed(VideoError.noQualityLevelsFound)
+						}
+						
+						self.state = .loaded(response)
+					case let .failure(error):
+						self.logger.error("Encountered an unexpected error while loading video information. Reporting the error to the user. Error: \(String(reflecting: error))")
+						self.state = .failed(error)
 					}
 				}
 				return enabled && !hidden && videoSizeOkay

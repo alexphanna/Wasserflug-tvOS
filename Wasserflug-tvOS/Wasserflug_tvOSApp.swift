@@ -70,21 +70,9 @@ struct Wasserflug_tvOSApp: App {
 	
 	var body: some Scene {
 		WindowGroup {
-			ContentView(viewModel: authViewModel)
-				.environment(\.fpApiService, fpApiService)
-				.environment(\.managedObjectContext, persistenceController.container.viewContext)
-		}
-	}
-	
-	private static func setHttp(header: String, value: String) {
-		FloatplaneAPIClientAPI.customHeaders.replaceOrAdd(name: header, value: value)
-		if var headers = URLSession.shared.configuration.httpAdditionalHeaders {
-			headers[header] = value
-			URLSession.shared.configuration.httpAdditionalHeaders = headers
-		} else {
-			URLSession.shared.configuration.httpAdditionalHeaders = [
-				header: value,
-			]
+            ContentView(viewModel: wasserflug.authViewModel)
+                .environment(\.fpApiService, wasserflug.fpApiService)
+                .environment(\.managedObjectContext, wasserflug.persistenceController.container.viewContext)
 		}
 	}
 }

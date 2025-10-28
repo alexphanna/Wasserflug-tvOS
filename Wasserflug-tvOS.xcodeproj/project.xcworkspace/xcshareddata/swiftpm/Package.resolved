@@ -209,6 +209,15 @@
         }
       },
       {
+        "package": "swiftui-cached-async-image",
+        "repositoryURL": "https://github.com/lorenzofiamingo/swiftui-cached-async-image",
+        "state": {
+          "branch": null,
+          "revision": "0a5bc04095a675662cf24757cc0640aa2204253b",
+          "version": "1.0.2"
+        }
+      },
+      {
         "package": "swift-system",
         "repositoryURL": "https://github.com/apple/swift-system.git",
         "state": {

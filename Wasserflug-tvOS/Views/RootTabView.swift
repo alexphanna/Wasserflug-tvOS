@@ -19,7 +19,11 @@ struct RootTabView: View {
 			HomeView(viewModel: HomeViewModel(userInfo: userInfo, fpApiService: fpApiService, managedObjectContext: managedObjectContext))
 				.tag(Selection.home)
 				.tabItem {
+                    #if os(tvOS)
 					Text("Home")
+                    #else
+                    Label("Home", systemImage: "house")
+                    #endif
 				}
 			
 			// There is an issue where multiple subscriptions for one creator might be active.
@@ -32,13 +36,21 @@ struct RootTabView: View {
 																	  livestream: creator.liveStream))
 					.tag(Selection.creator(creator.id))
 					.tabItem {
-						Text(creator.title)
+                        #if os(tvOS)
+                        Text(creator.title)
+                        #else
+                        Label(creator.title, systemImage: "person.crop.rectangle")
+                        #endif
 					}
 			}
 			SettingsView()
 				.tag(Selection.settings)
 				.tabItem {
-					Text("Settings")
+                    #if os(tvOS)
+                    Text("Settings")
+                    #else
+                    Label("Settings", systemImage: "gear")
+                    #endif
 				}
 		}
 	}
